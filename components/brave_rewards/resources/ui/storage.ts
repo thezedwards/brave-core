@@ -58,7 +58,8 @@ export const defaultState: Rewards.State = {
   },
   pendingContributionTotal: 0,
   grants: [],
-  currentGrant: undefined
+  currentGrant: undefined,
+  pendingContributions: []
 }
 
 const cleanData = (state: Rewards.State) => state

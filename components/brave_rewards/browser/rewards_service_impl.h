@@ -218,6 +218,15 @@ class RewardsServiceImpl : public RewardsService,
 
   void SetContributionAmount(const double amount) const override;
 
+  void GetPendingContributionsUI(
+    GetPendingContributionsCallback callback) override;
+
+  void RemovePendingContributionUI(const std::string& publisher_key,
+                                 const std::string& viewing_id,
+                                 uint64_t added_date) override;
+
+  void RemoveAllPendingContributionsUI() override;
+
   // Testing methods
   void SetLedgerEnvForTesting();
   void StartAutoContributeForTest();
@@ -320,6 +329,45 @@ class RewardsServiceImpl : public RewardsService,
   void OnPublisherActivityInfoLoaded(ledger::PublisherInfoCallback callback,
                                      uint32_t result,
                                      ledger::PublisherInfoPtr info);
+
+  void OnPendingContributionRemoved(
+    ledger::RemovePendingContributionCallback callback,
+    bool result);
+
+  void OnRemoveAllPendingContribution(
+    ledger::RemovePendingContributionCallback callback,
+    bool result);
+
+  void OnGetPendingContributionsUI(
+    GetPendingContributionsCallback callback,
+    const std::vector<std::string>& json_list);
+
+  void OnGetPendingContributions(
+    const ledger::PendingContributionInfoListCallback& callback,
+    const ledger::PendingContributionInfoList& list);
+
+  void OnGetExcludedPublishersNumberDB(
+    ledger::GetExcludedPublishersNumberDBCallback callback,
+    int number);
+
+  void OnURLLoaderComplete(network::SimpleURLLoader* loader,
+                           ledger::LoadURLCallback callback,
+                           std::unique_ptr<std::string> response_body);
+
+  void StartNotificationTimers(bool main_enabled);
+  void StopNotificationTimers();
+  void OnNotificationTimerFired();
+
+  void MaybeShowNotificationAddFunds();
+  bool ShouldShowNotificationAddFunds() const;
+  void ShowNotificationAddFunds(bool sufficient);
+
+  void MaybeShowNotificationTipsPaid();
+  void ShowNotificationTipsPaid(bool ac_enabled);
+
+  void OnPendingContributionRemovedUI(int32_t result);
+
+  void OnRemoveAllPendingContributionsUI(int32_t result);
 
   // ledger::LedgerClient
   std::string GenerateGUID() const override;
@@ -441,24 +489,19 @@ class RewardsServiceImpl : public RewardsService,
   void GetExcludedPublishersNumberDB(
       ledger::GetExcludedPublishersNumberDBCallback callback) override;
 
-  void OnGetExcludedPublishersNumberDB(
-      ledger::GetExcludedPublishersNumberDBCallback callback,
-      int number);
+  void GetPendingContributions(
+    const ledger::PendingContributionInfoListCallback& callback) override;
 
-  void OnURLLoaderComplete(network::SimpleURLLoader* loader,
-                           ledger::LoadURLCallback callback,
-                           std::unique_ptr<std::string> response_body);
+  void RemovePendingContribution(
+    const std::string& publisher_key,
+    const std::string& viewing_id,
+    uint64_t added_date,
+    const ledger::RemovePendingContributionCallback& callback) override;
 
-  void StartNotificationTimers(bool main_enabled);
-  void StopNotificationTimers();
-  void OnNotificationTimerFired();
+  void RemoveAllPendingContributions(
+    const ledger::RemovePendingContributionCallback& callback) override;
 
-  void MaybeShowNotificationAddFunds();
-  bool ShouldShowNotificationAddFunds() const;
-  void ShowNotificationAddFunds(bool sufficient);
-
-  void MaybeShowNotificationTipsPaid();
-  void ShowNotificationTipsPaid(bool ac_enabled);
+  // end ledger::LedgerClient
 
   // Mojo Proxy methods
   void OnGetTransactionHistoryForThisCycle(

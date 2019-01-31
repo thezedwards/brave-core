@@ -18,6 +18,7 @@
 #include "bat/ledger/media_publisher_info.h"
 #include "bat/ledger/transactions_info.h"
 #include "bat/ledger/rewards_internals_info.h"
+#include "bat/ledger/pending_contribution.h"
 
 namespace ledger {
 
@@ -287,6 +288,18 @@ class LEDGER_EXPORT Ledger {
       ledger::OnRefreshPublisherCallback callback) = 0;
 
   virtual void StartAutoContribute() = 0;
+
+  virtual void GetPendingContributions(
+      ledger::PendingContributionInfoListCallback callback) = 0;
+
+  virtual void RemovePendingContribution(
+      const std::string& publisher_key,
+      const std::string& viewing_id,
+      uint64_t added_date,
+      const ledger::RemovePendingContributionCallback& callback) = 0;
+
+  virtual void RemoveAllPendingContributions(
+    const ledger::RemovePendingContributionCallback& callback) = 0;
 };
 
 }  // namespace ledger
