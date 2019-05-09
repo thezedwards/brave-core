@@ -502,11 +502,7 @@ bool PublisherInfoDatabase::GetExcludedList(
   }
 
   // We will use every attribute from publisher_info
-  std::string query = "SELECT * FROM publisher_info "
-                      "WHERE publisher_info.publisher_id NOT IN "
-                      "(SELECT publisher_id FROM activity_info "
-                      "WHERE activity_info.publisher_id = publisher_info.publisher_id) "
-                      " AND publisher_info.excluded = 1";
+  std::string query = "SELECT * FROM publisher_info WHERE excluded = 1";
 
   sql::Statement info_sql(db_.GetUniqueStatement(query.c_str()));
 
@@ -615,7 +611,6 @@ bool PublisherInfoDatabase::GetActivityList(
   }
 
   if (filter.excluded != ledger::EXCLUDE_FILTER::FILTER_ALL &&
-      filter.excluded != ledger::EXCLUDE_FILTER::FILTER_EXCLUDED &&
       filter.excluded !=
       ledger::EXCLUDE_FILTER::FILTER_ALL_EXCEPT_EXCLUDED) {
     info_sql.BindInt(column++, filter.excluded);
