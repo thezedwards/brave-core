@@ -10,7 +10,7 @@ pipeline {
     parameters {
         choice(name: "CHANNEL", choices: ["nightly", "dev", "beta", "release"], description: "")
         booleanParam(name: "WIPE_WORKSPACE", defaultValue: false, description: "")
-        booleanParam(name: "RUN_INIT", defaultValue: false, description: "")
+        booleanParam(name: "SKIP_INIT", defaultValue: false, description: "")
         booleanParam(name: "DISABLE_SCCACHE", defaultValue: false, description: "")
         // TODO: add SKIP_SIGNING
         booleanParam(name: "DEBUG", defaultValue: false, description: "")
@@ -27,7 +27,7 @@ pipeline {
                 script {
                     CHANNEL = params.CHANNEL
                     WIPE_WORKSPACE = params.WIPE_WORKSPACE
-                    RUN_INIT = params.RUN_INIT
+                    SKIP_INIT = params.SKIP_INIT
                     DISABLE_SCCACHE = params.DISABLE_SCCACHE
                     DEBUG = params.DEBUG
                     BRANCH_TO_BUILD = (env.CHANGE_BRANCH.equals(null) ? env.BRANCH_NAME : env.CHANGE_BRANCH)
@@ -163,7 +163,7 @@ pipeline {
                     params = [
                         string(name: "CHANNEL", value: CHANNEL),
                         booleanParam(name: "WIPE_WORKSPACE", value: WIPE_WORKSPACE),
-                        booleanParam(name: "RUN_INIT", value: RUN_INIT),
+                        booleanParam(name: "SKIP_INIT", value: SKIP_INIT),
                         booleanParam(name: "DISABLE_SCCACHE", value: DISABLE_SCCACHE),
                         // TODO: add SKIP_SIGNING
                         booleanParam(name: "DEBUG", value: DEBUG)
