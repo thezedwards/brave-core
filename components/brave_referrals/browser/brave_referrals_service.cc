@@ -14,7 +14,6 @@
 #include "base/json/json_reader.h"
 #include "base/json/json_writer.h"
 #include "base/path_service.h"
-#include "base/rand_util.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/string_util.h"
 #include "base/system/sys_info.h"
@@ -38,6 +37,7 @@
 #include "net/traffic_annotation/network_traffic_annotation.h"
 #include "services/network/public/cpp/resource_request.h"
 #include "services/network/public/cpp/simple_url_loader.h"
+#include "vendor/brave_random/random.h"
 
 // Fetch headers from the referral server once a day.
 const int kFetchReferralHeadersFrequency = 60 * 60 * 24;
@@ -106,10 +106,11 @@ void BraveReferralsService::Start() {
   // Also, periodically fetch the referral headers.
   DCHECK(!fetch_referral_headers_timer_);
   fetch_referral_headers_timer_ = std::make_unique<base::RepeatingTimer>();
+  auto avg_secs = kFetchReferralHeadersFrequency;  // period, not frequency...
+  auto delay_secs = brave::random::Geometric(avg_secs);
   fetch_referral_headers_timer_->Start(
       FROM_HERE,
-      base::TimeDelta::FromSeconds(kFetchReferralHeadersFrequency +
-                                   base::RandInt(0, 60 * 10)),
+      base::TimeDelta::FromSeconds(delay_secs),
       this, &BraveReferralsService::OnFetchReferralHeadersTimerFired);
   DCHECK(fetch_referral_headers_timer_->IsRunning());
 
