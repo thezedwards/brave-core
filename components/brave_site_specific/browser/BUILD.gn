@@ -1,0 +1,30 @@
+import("//brave/build/config.gni")
+
+source_set("browser") {
+  sources = [
+    "site_specific_script_config_service.cc",
+    "site_specific_script_config_service.h",
+    "site_specific_script_service.h",
+    "site_specific_script_service_factory.cc",
+    "site_specific_script_service_factory.h",
+    "site_specific_script_service_impl.cc",
+    "site_specific_script_service_impl.h",
+  ]
+
+  deps = [
+    "//base",
+    "//brave/components/brave_rewards/common",
+    "//brave/components/brave_rewards/browser",
+    "//components/keyed_service/content",
+    "//components/keyed_service/core",
+    "//components/prefs",
+    "//components/pref_registry",
+    "//components/sessions",
+    "//url",
+    # for profile.h
+    "//components/domain_reliability",
+    "//content/public/browser",
+    "//content/public/common",
+  ]
+
+}

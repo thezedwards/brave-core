@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "brave/components/brave_shields/browser/site_specific_script_service.h"
+#include "brave/components/brave_site_specific/browser/site_specific_script_config_service.h"
 
 #include <algorithm>
 #include <utility>
@@ -22,7 +22,7 @@
 #include "brave/components/brave_shields/browser/local_data_files_service.h"
 #include "brave/components/brave_shields/browser/dat_file_util.h"
 
-namespace brave_shields {
+namespace brave_site_specific {
 
 SiteSpecificScriptRule::SiteSpecificScriptRule(base::ListValue* urls_value,
                                                base::ListValue* scripts_value,
@@ -75,7 +75,7 @@ void SiteSpecificScriptRule::AddScriptAfterLoad(
   scripts_.push_back(*contents);
 }
 
-bool SiteSpecificScriptRule::MatchesURL(const GURL& url) const {
+bool SiteSpecificScriptRule::Matches(const GURL& url, bool rewards_enabled) const {
   return urls_.MatchesURL(url);
 }
 
@@ -89,28 +89,15 @@ SiteSpecificScriptRule::GetTaskRunner() {
   return g_brave_browser_process->ad_block_service()->GetTaskRunner();
 }
 
-SiteSpecificScriptService::SiteSpecificScriptService()
+SiteSpecificScriptConfigService::SiteSpecificScriptConfigService()
     : weak_factory_(this) {
   DETACH_FROM_SEQUENCE(sequence_checker_);
 }
 
-SiteSpecificScriptService::~SiteSpecificScriptService() {
+SiteSpecificScriptConfigService::~SiteSpecificScriptConfigService() {
 }
 
-bool SiteSpecificScriptService::ScriptsFor(const GURL& primary_url,
-                                           std::vector<std::string>* scripts) {
-  bool any = false;
-  scripts->clear();
-  for (const auto& rule : rules_) {
-    if (rule->MatchesURL(primary_url)) {
-      rule->Populate(scripts);
-      any = true;
-    }
-  }
-  return any;
-}
-
-void SiteSpecificScriptService::OnDATFileDataReady() {
+void SiteSpecificScriptConfigService::OnDATFileDataReady() {
   rules_.clear();
   if (file_contents_.empty()) {
     LOG(ERROR) << "Could not obtain site-specific script configuration";
@@ -139,7 +126,7 @@ void SiteSpecificScriptService::OnDATFileDataReady() {
   }
 }
 
-void SiteSpecificScriptService::OnComponentReady(
+void SiteSpecificScriptConfigService::OnComponentReady(
     const std::string& component_id,
     const base::FilePath& install_dir,
     const std::string& manifest) {
@@ -149,28 +136,29 @@ void SiteSpecificScriptService::OnComponentReady(
       SITE_SPECIFIC_SCRIPT_CONFIG_FILE);
   GetTaskRunner()->PostTaskAndReply(
     FROM_HERE,
-    base::Bind(&GetDATFileAsString, dat_file_path, &file_contents_),
-    base::Bind(&SiteSpecificScriptService::OnDATFileDataReady,
+    base::Bind(&brave_shields::GetDATFileAsString,
+               dat_file_path,
+               &file_contents_),
+    base::Bind(&SiteSpecificScriptConfigService::OnDATFileDataReady,
                weak_factory_.GetWeakPtr()));
 }
 
 scoped_refptr<base::SequencedTaskRunner>
-SiteSpecificScriptService::GetTaskRunner() {
+SiteSpecificScriptConfigService::GetTaskRunner() {
   // We share the same task runner as ad-block code
   return g_brave_browser_process->ad_block_service()->GetTaskRunner();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// The site-specific script factory. Using the Brave Shields as a singleton
-// is the job of the browser process.
-std::unique_ptr<SiteSpecificScriptService>
-SiteSpecificScriptServiceFactory() {
-  std::unique_ptr<SiteSpecificScriptService> service =
-    std::make_unique<SiteSpecificScriptService>();
+// The factory
+std::unique_ptr<SiteSpecificScriptConfigService>
+SiteSpecificScriptConfigServiceFactory() {
+  std::unique_ptr<SiteSpecificScriptConfigService> service =
+    std::make_unique<SiteSpecificScriptConfigService>();
   g_brave_browser_process->local_data_files_service()->AddObserver(
     service.get());
   return service;
 }
 
-}  // namespace brave_shields
+}  // namespace brave_site_specific

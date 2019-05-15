@@ -24,8 +24,8 @@
 #include "brave/components/brave_shields/browser/https_everywhere_service.h"
 #include "brave/components/brave_shields/browser/local_data_files_service.h"
 #include "brave/components/brave_shields/browser/referrer_whitelist_service.h"
-#include "brave/components/brave_shields/browser/site_specific_script_service.h"
 #include "brave/components/brave_shields/browser/tracking_protection_service.h"
+#include "brave/components/brave_site_specific/browser/site_specific_script_config_service.h"
 #include "chrome/browser/io_thread.h"
 #include "chrome/common/chrome_paths.h"
 #include "components/component_updater/component_updater_service.h"
@@ -156,13 +156,13 @@ BraveBrowserProcessImpl::referrer_whitelist_service() {
   return referrer_whitelist_service_.get();
 }
 
-brave_shields::SiteSpecificScriptService*
-BraveBrowserProcessImpl::site_specific_script_service() {
-  if (!site_specific_script_service_) {
-    site_specific_script_service_ =
-      brave_shields::SiteSpecificScriptServiceFactory();
+brave_site_specific::SiteSpecificScriptConfigService*
+BraveBrowserProcessImpl::site_specific_script_config_service() {
+  if (!site_specific_script_config_service_) {
+    site_specific_script_config_service_ =
+      brave_site_specific::SiteSpecificScriptConfigServiceFactory();
   }
-  return site_specific_script_service_.get();
+  return site_specific_script_config_service_.get();
 }
 
 brave_shields::TrackingProtectionService*

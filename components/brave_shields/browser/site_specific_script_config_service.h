@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef BRAVE_COMPONENTS_BRAVE_SHIELDS_BROWSER_SITE_SPECIFIC_SCRIPT_SERVICE_H_
-#define BRAVE_COMPONENTS_BRAVE_SHIELDS_BROWSER_SITE_SPECIFIC_SCRIPT_SERVICE_H_
+#ifndef BRAVE_COMPONENTS_BRAVE_SHIELDS_BROWSER_SITE_SPECIFIC_SCRIPT_CONFIG_SERVICE_H_
+#define BRAVE_COMPONENTS_BRAVE_SHIELDS_BROWSER_SITE_SPECIFIC_SCRIPT_CONFIG_SERVICE_H_
 
 #include <stdint.h>
 
@@ -52,13 +52,13 @@ class SiteSpecificScriptRule {
   DISALLOW_COPY_AND_ASSIGN(SiteSpecificScriptRule);
 };
 
-// The brave shields service in charge of site-specific script injection
-class SiteSpecificScriptService : public BaseLocalDataFilesObserver {
+// The brave shields service in charge of loading and parsing the
+// site-specific script configuration file and the scripts listed in
+// the configuration file.
+class SiteSpecificScriptConfigService : public BaseLocalDataFilesObserver {
  public:
-  SiteSpecificScriptService();
-  ~SiteSpecificScriptService() override;
-
-  bool ScriptsFor(const GURL& primary_url, std::vector<std::string>* scripts);
+  SiteSpecificScriptConfigService();
+  ~SiteSpecificScriptConfigService() override;
 
   scoped_refptr<base::SequencedTaskRunner> GetTaskRunner();
 
@@ -78,13 +78,14 @@ class SiteSpecificScriptService : public BaseLocalDataFilesObserver {
   base::FilePath install_dir_;
 
   SEQUENCE_CHECKER(sequence_checker_);
-  base::WeakPtrFactory<SiteSpecificScriptService> weak_factory_;
-  DISALLOW_COPY_AND_ASSIGN(SiteSpecificScriptService);
+  base::WeakPtrFactory<SiteSpecificScriptConfigService> weak_factory_;
+  DISALLOW_COPY_AND_ASSIGN(SiteSpecificScriptConfigService);
 };
 
-// Creates the SiteSpecificScriptService
-std::unique_ptr<SiteSpecificScriptService> SiteSpecificScriptServiceFactory();
+// Creates the SiteSpecificScriptConfigService
+std::unique_ptr<SiteSpecificScriptConfigService>
+SiteSpecificScriptConfigServiceFactory();
 
 }  // namespace brave_shields
 
-#endif  // BRAVE_COMPONENTS_BRAVE_SHIELDS_BROWSER_SITE_SPECIFIC_SCRIPT_SERVICE_H_
+#endif  // BRAVE_COMPONENTS_BRAVE_SHIELDS_BROWSER_SITE_SPECIFIC_SCRIPT_CONFIG_SERVICE_H_

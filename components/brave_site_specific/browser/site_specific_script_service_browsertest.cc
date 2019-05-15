@@ -10,13 +10,17 @@
 #include "brave/browser/brave_browser_process_impl.h"
 #include "brave/common/brave_paths.h"
 #include "brave/components/brave_shields/browser/local_data_files_service.h"
-#include "brave/components/brave_shields/browser/site_specific_script_service.h"
+#include "brave/components/brave_site_specific/browser/site_specific_script_config_service.h"
+#include "brave/components/brave_site_specific/browser/site_specific_script_service_factory.h"
+#include "brave/components/brave_site_specific/browser/site_specific_script_service_impl.h"
 #include "chrome/browser/extensions/extension_browsertest.h"
 #include "chrome/test/base/ui_test_utils.h"
 #include "content/public/test/browser_test_utils.h"
 #include "net/dns/mock_host_resolver.h"
 
 using extensions::ExtensionBrowserTest;
+using brave_site_specific::SiteSpecificScriptService;
+using brave_site_specific::SiteSpecificScriptServiceFactory;
 
 const char kLocalDataFilesComponentTestId[] =
     "eclbkhjphkhalklhipiicaldjbnhdfkc";
@@ -81,8 +85,8 @@ class SiteSpecificScriptServiceTest : public ExtensionBrowserTest {
     if (!mock_extension)
       return false;
 
-    g_brave_browser_process->site_specific_script_service()->OnComponentReady(
-      mock_extension->id(), mock_extension->path(), "");
+    g_brave_browser_process->site_specific_script_config_service()->
+      OnComponentReady(mock_extension->id(), mock_extension->path(), "");
     WaitForSiteSpecificScriptServiceThread();
 
     return true;
@@ -91,25 +95,26 @@ class SiteSpecificScriptServiceTest : public ExtensionBrowserTest {
   void WaitForSiteSpecificScriptServiceThread() {
     scoped_refptr<base::ThreadTestHelper> io_helper(
         new base::ThreadTestHelper(
-            g_brave_browser_process->site_specific_script_service()->
+            g_brave_browser_process->site_specific_script_config_service()->
             GetTaskRunner()));
     ASSERT_TRUE(io_helper->Run());
     base::RunLoop().RunUntilIdle();
   }
 
-  bool ScriptsFor(const GURL& primary_url, std::vector<std::string>* scripts) {
-    return g_brave_browser_process->site_specific_script_service()->
-      ScriptsFor(primary_url, scripts);
+  bool ScriptsFor(const GURL& url, std::vector<std::string>* scripts) {
+    SiteSpecificScriptService* site_specific_script_service =
+      SiteSpecificScriptServiceFactory::GetForProfile(profile());
+    return site_specific_script_service->ScriptsFor(url, scripts);
   }
 
   int GetRulesSize() {
-    return g_brave_browser_process->site_specific_script_service()->
-      rules_.size();
+    return g_brave_browser_process->site_specific_script_config_service()->
+      rules()->size();
   }
 
   void ClearRules() {
-    g_brave_browser_process->site_specific_script_service()->
-      rules_.clear();
+    g_brave_browser_process->site_specific_script_config_service()->
+      rules()->clear();
   }
 };
 

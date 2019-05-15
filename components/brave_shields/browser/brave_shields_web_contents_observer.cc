@@ -17,8 +17,10 @@
 #include "brave/common/pref_names.h"
 #include "brave/common/render_messages.h"
 #include "brave/components/brave_shields/browser/brave_shields_util.h"
-#include "brave/components/brave_shields/browser/site_specific_script_service.h"
 #include "brave/components/brave_shields/common/brave_shield_constants.h"
+#include "brave/components/brave_site_specific/browser/site_specific_script_config_service.h"
+#include "brave/components/brave_site_specific/browser/site_specific_script_service_factory.h"
+#include "brave/components/brave_site_specific/browser/site_specific_script_service.h"
 #include "brave/content/common/frame_messages.h"
 #include "chrome/browser/content_settings/host_content_settings_map_factory.h"
 #include "chrome/browser/extensions/extension_tab_util.h"
@@ -73,6 +75,8 @@ void UpdateContentSettingsToRendererFrames(content::WebContents* web_contents) {
 
 }  // namespace
 
+using brave_site_specific::SiteSpecificScriptService;
+using brave_site_specific::SiteSpecificScriptServiceFactory;
 using extensions::Event;
 using extensions::EventRouter;
 using content::Referrer;
@@ -197,8 +201,11 @@ void BraveShieldsWebContentsObserver::DocumentLoadedInFrame(
   RenderFrameHost* render_frame_host) {
   const GURL& url = render_frame_host->GetLastCommittedURL();
   std::vector<std::string> scripts;
-  if (!g_brave_browser_process->site_specific_script_service()->ScriptsFor(
-        url, &scripts))
+  Profile* profile = Profile::FromBrowserContext(
+    web_contents()->GetBrowserContext());
+  SiteSpecificScriptService* site_specific_script_service =
+      SiteSpecificScriptServiceFactory::GetForProfile(profile);
+  if (!site_specific_script_service->ScriptsFor(url, &scripts))
     return;
 
   for (auto script : scripts) {
