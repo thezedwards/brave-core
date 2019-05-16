@@ -87,6 +87,8 @@ source_set("brave_page_graph") {
       "graph_item/edge/edge_storage_set.h",
       "graph_item/edge/edge_storage.cc",
       "graph_item/edge/edge_storage.h",
+      "graph_item/edge/edge_text_change.cc",
+      "graph_item/edge/edge_text_change.h",
       "graph_item/graph_item.cc",
       "graph_item/graph_item.h",
       "page_graph.cc",

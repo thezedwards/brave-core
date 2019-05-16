@@ -26,6 +26,7 @@
 #include "brave/third_party/blink/brave_page_graph/graph_item/edge/edge_node_delete.h"
 #include "brave/third_party/blink/brave_page_graph/graph_item/edge/edge_node_insert.h"
 #include "brave/third_party/blink/brave_page_graph/graph_item/edge/edge_node_remove.h"
+#include "brave/third_party/blink/brave_page_graph/graph_item/edge/edge_text_change.h"
 #include "brave/third_party/blink/brave_page_graph/graph_item/edge/request/edge_request.h"
 #include "brave/third_party/blink/brave_page_graph/graph_item/edge/request/edge_request_start.h"
 #include "brave/third_party/blink/brave_page_graph/graph_item/edge/request/edge_request_error.h"
@@ -312,6 +313,24 @@ void PageGraph::RegisterAttributeDelete(const DOMNodeId node_id,
 
   acting_node->AddOutEdge(edge);
   target_node->AddInEdge(edge);
+}
+
+void PageGraph::RegisterTextNodeChange(const blink::DOMNodeId node_id,
+    const WTF::String& new_text) {
+  PG_LOG("RegisterNewTextNodeText: " + to_string(node_id));
+  LOG_ASSERT(text_nodes_.count(node_id) == 1);
+
+  NodeHTMLText* const text_node = text_nodes_.at(node_id);
+  NodeScript* const acting_node = static_cast<NodeScript*>(
+    GetCurrentActingNode());
+
+  string local_new_text(new_text.Utf8().data());
+  const EdgeTextChange* const edge = new EdgeTextChange(this,
+    acting_node, text_node, local_new_text);
+  AddEdge(edge);
+
+  acting_node->AddOutEdge(edge);
+  text_node->AddInEdge(edge);
 }
 
 void PageGraph::RegisterRequestStartFromElm(const DOMNodeId node_id,

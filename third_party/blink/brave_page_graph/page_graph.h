@@ -65,6 +65,9 @@ friend EdgeNodeInsert;
   void RegisterAttributeDelete(const blink::DOMNodeId node_id,
     const WTF::String& attr_name);
 
+  void RegisterTextNodeChange(const blink::DOMNodeId node_id,
+    const WTF::String& new_text);
+
   void RegisterRequestStartFromElm(const blink::DOMNodeId node_id,
     const InspectorId request_id, const blink::KURL& url,
     const RequestType type);
@@ -96,7 +99,7 @@ friend EdgeNodeInsert;
 
   void RegisterScriptExecStart(const ScriptId script_id);
   // The Script ID is only used here as a sanity check to make sure we're
-  // correctly tracking script execution correctly.
+  // correctly tracking script execution.
   void RegisterScriptExecStop(const ScriptId script_id);
 
   GraphMLXML ToGraphML() const;
