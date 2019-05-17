@@ -1545,4 +1545,9 @@ void LedgerImpl::RemoveAllPendingContributions(
   ledger_client_->RemoveAllPendingContributions(callback);
 }
 
+void LedgerImpl::GetPendingContributionsTotal(
+    const ledger::PendingContributionsTotalCallback& callback) {
+  ledger_client_->GetPendingContributionsTotal(callback);
+}
+
 }  // namespace bat_ledger

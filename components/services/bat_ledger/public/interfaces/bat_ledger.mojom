@@ -125,6 +125,8 @@ interface BatLedger {
       uint64 added_date) => (int32 result);
 
   RemoveAllPendingContributions() => (int32 result);
+
+  GetPendingContributionsTotal() => (double amount);
 };
 
 interface BatLedgerClient {
@@ -216,4 +218,6 @@ interface BatLedgerClient {
       uint64 added_date) => (int32 result);
 
   RemoveAllPendingContributions() => (int32 result);
+
+  GetPendingContributionsTotal() => (double amount);
 };
