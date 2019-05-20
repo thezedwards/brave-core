@@ -6,6 +6,7 @@
 #include "brave/components/brave_sync/brave_profile_sync_service.h"
 
 #include "base/bind.h"
+#include "base/task/post_task.h"
 #include "base/strings/utf_string_conversions.h"
 #include "brave/components/brave_sync/values_conv.h"
 #include "brave/components/brave_sync/brave_sync_prefs.h"
@@ -20,6 +21,7 @@
 #include "components/bookmarks/browser/bookmark_model.h"
 #include "components/signin/core/browser/account_info.h"
 #include "components/sync/engine_impl/syncer.h"
+#include "content/public/browser/browser_task_traits.h"
 #include "content/public/browser/browser_thread.h"
 #include "net/base/network_interfaces.h"
 #include "ui/base/models/tree_node_iterator.h"
@@ -485,7 +487,8 @@ void BraveProfileSyncService::OnSyncReady() {
     ProfileSyncService::GetUserSettings()
       ->SetChosenDataTypes(false, syncer::ModelTypeSet());
     // default enable bookmark
-    OnSetSyncBookmarks(true);
+    brave_sync_prefs_->SetSyncBookmarksEnabled(true);
+    StartPreChainDevFetch();
     ProfileSyncService::GetUserSettings()->SetSyncRequested(true);
   }
 }
@@ -692,6 +695,7 @@ void BraveProfileSyncService::OnResolvedPreferences(
   bool contains_only_one_device = false;
 
   auto sync_devices = brave_sync_prefs_->GetSyncDevices();
+  auto old_devices_size = sync_devices->size();
   for (const auto &record : records) {
     DCHECK(record->has_device() || record->has_sitesetting());
     if (record->has_device()) {
@@ -714,6 +718,13 @@ void BraveProfileSyncService::OnResolvedPreferences(
   }  // for each device
 
   brave_sync_prefs_->SetSyncDevices(*sync_devices);
+
+  if (old_devices_size < 2 && sync_devices->size() >= 2) {
+    StopPreChainDevFetch();
+    // Re-enable sync of bookmarks
+    bool sync_bookmarks = brave_sync_prefs_->GetSyncBookmarksEnabled();
+    OnSetSyncBookmarks(sync_bookmarks);
+  }
 
   if (this_device_deleted) {
     ResetSyncInternal();
@@ -778,6 +789,34 @@ void BraveProfileSyncService::SignalWaitableEvent() {
     wevent_->Signal();
     wevent_ = nullptr;
   }
+}
+
+static const int64_t kPreChainDevFetchIntervalSec = 10;
+void BraveProfileSyncService::StartPreChainDevFetch() {
+  pre_chain_dev_fetch_timer_ = std::make_unique<base::RepeatingTimer>();
+  pre_chain_dev_fetch_timer_->Start(FROM_HERE,
+                  base::TimeDelta::FromSeconds(kPreChainDevFetchIntervalSec),
+                  this,
+                  &BraveProfileSyncService::PreChainDevFetchProc);
+}
+
+void BraveProfileSyncService::StopPreChainDevFetch() {
+  pre_chain_dev_fetch_timer_->Stop();
+  pre_chain_dev_fetch_timer_.reset();
+}
+
+void BraveProfileSyncService::PreChainDevFetchProc() {
+  base::CreateSingleThreadTaskRunnerWithTraits(
+    {content::BrowserThread::UI})->PostTask(
+          FROM_HERE,
+          base::BindOnce(&BraveProfileSyncService::PreChainDevFetchUiProc,
+              // the timer will always be destroyed before the service
+              base::Unretained(this)));
+}
+
+void BraveProfileSyncService::PreChainDevFetchUiProc() {
+  DCHECK_CURRENTLY_ON(content::BrowserThread::UI);
+  GetBraveSyncClient()->SendFetchSyncDevices();
 }
 
 }   // namespace brave_sync

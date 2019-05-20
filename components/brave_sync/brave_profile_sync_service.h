@@ -137,6 +137,11 @@ class BraveProfileSyncService : public browser_sync::ProfileSyncService,
 
   void SetPermanentNodesOrder(const std::string& base_order);
 
+  void StartPreChainDevFetch();
+  void StopPreChainDevFetch();
+  void PreChainDevFetchProc();
+  void PreChainDevFetchUiProc();
+
   std::unique_ptr<brave_sync::prefs::Prefs> brave_sync_prefs_;
   // True when is in active sync chain
   bool brave_sync_configured_ = false;
@@ -157,6 +162,8 @@ class BraveProfileSyncService : public browser_sync::ProfileSyncService,
   PrefChangeRegistrar brave_pref_change_registrar_;
 
   bookmarks::BookmarkModel* model_ = nullptr;
+
+  std::unique_ptr<base::RepeatingTimer> pre_chain_dev_fetch_timer_;
 
   // Used to ensure that certain operations are performed on the sequence that
   // this object was created on.
