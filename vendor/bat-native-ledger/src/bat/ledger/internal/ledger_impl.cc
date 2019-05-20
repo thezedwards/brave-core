@@ -1040,10 +1040,6 @@ void LedgerImpl::GetPublisherBanner(const std::string& publisher_id,
   bat_publishers_->getPublisherBanner(publisher_id, callback);
 }
 
-double LedgerImpl::GetBalance() {
-  return bat_state_->GetBalance();
-}
-
 void LedgerImpl::OnReconcileCompleteSuccess(
     const std::string& viewing_id,
     const ledger::REWARDS_CATEGORY category,
@@ -1393,7 +1389,9 @@ double LedgerImpl::GetDefaultContributionAmount() {
 }
 
 bool LedgerImpl::HasSufficientBalanceToReconcile() {
-  return GetBalance() >= GetContributionAmount();
+  // will be replaced by https://github.com/brave/brave-core/pull/2208
+  // do not merge until then
+  return true;
 }
 
 void LedgerImpl::SaveNormalizedPublisherList(
