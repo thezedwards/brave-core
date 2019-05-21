@@ -195,6 +195,7 @@ class RewardsServiceImpl : public RewardsService,
   void GetReconcileTime(const GetReconcileTimeCallback& callback);
   void SetShortRetries(bool short_retries);
   void GetShortRetries(const GetShortRetriesCallback& callback);
+  void SetCurrentCountry(const std::string& current_country_);
 
   void GetAutoContributeProps(
       const GetAutoContributePropsCallback& callback) override;
@@ -469,6 +470,9 @@ class RewardsServiceImpl : public RewardsService,
       const base::flat_map<std::string, std::string>& json_reports);
   void OnGetCurrentBalanceReport(
       bool success, const std::string& json_report);
+  void OnGetAddressesLimitedCountries(
+      const GetAddressesCallback& callback,
+      const std::vector<std::string>& country_chars);
   void OnGetAddresses(
       const GetAddressesCallback& callback,
       const base::flat_map<std::string, std::string>& addresses);
@@ -521,6 +525,7 @@ class RewardsServiceImpl : public RewardsService,
   uint32_t next_timer_id_;
 
   GetTestResponseCallback test_response_callback_;
+  std::string current_country_for_test_;
 
   DISALLOW_COPY_AND_ASSIGN(RewardsServiceImpl);
 };

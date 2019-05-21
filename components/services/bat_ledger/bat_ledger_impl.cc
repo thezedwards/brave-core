@@ -233,8 +233,16 @@ void BatLedgerImpl::SolveGrantCaptcha(const std::string& solution,
   ledger_->SolveGrantCaptcha(solution, promotion_id);
 }
 
-void BatLedgerImpl::GetAddresses(GetAddressesCallback callback) {
-  std::move(callback).Run(mojo::MapToFlatMap(ledger_->GetAddresses()));
+void BatLedgerImpl::GetAddressesLimitedCountries(
+    GetAddressesLimitedCountriesCallback callback) {
+  std::move(callback).Run(ledger_->GetAddressesLimitedCountries());
+}
+
+void BatLedgerImpl::GetAddresses(
+    bool limit_addresses,
+    GetAddressesCallback callback) {
+  std::move(callback).Run(mojo::MapToFlatMap(
+      ledger_->GetAddresses(limit_addresses)));
 }
 
 void BatLedgerImpl::GetBATAddress(GetBATAddressCallback callback) {

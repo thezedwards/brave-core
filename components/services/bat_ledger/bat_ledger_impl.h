@@ -84,7 +84,11 @@ class BatLedgerImpl : public mojom::BatLedger,
       const std::string& solution,
       const std::string& promotionId) override;
 
-  void GetAddresses(GetAddressesCallback callback) override;
+  void GetAddressesLimitedCountries(
+      GetAddressesLimitedCountriesCallback callback) override;
+  void GetAddresses(
+      bool limit_addresses,
+      GetAddressesCallback callback) override;
   void GetBATAddress(GetBATAddressCallback callback) override;
   void GetBTCAddress(GetBTCAddressCallback callback) override;
   void GetETHAddress(GetETHAddressCallback callback) override;

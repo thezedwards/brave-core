@@ -120,7 +120,9 @@ class LedgerImpl : public ledger::Ledger,
 
   void SaveUnverifiedContribution(const ledger::PendingContributionList& list);
 
-  std::map<std::string, std::string> GetAddresses() override;
+  const std::vector<std::string>& GetAddressesLimitedCountries() const override;
+  std::map<std::string, std::string> GetAddresses(
+      bool limit_addresses) override;
 
   const std::string& GetBATAddress() const override;
 

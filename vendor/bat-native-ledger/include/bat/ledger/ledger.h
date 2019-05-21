@@ -169,7 +169,10 @@ class LEDGER_EXPORT Ledger {
                               int year,
                               const ledger::BalanceReportInfo& report_info) = 0;
 
-  virtual std::map<std::string, std::string> GetAddresses() = 0;
+  virtual const std::vector<std::string>&
+      GetAddressesLimitedCountries() const = 0;
+  virtual std::map<std::string, std::string> GetAddresses(
+      bool limit_addresses) = 0;
 
   virtual const std::string& GetBATAddress() const = 0;
 

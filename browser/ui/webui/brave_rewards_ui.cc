@@ -598,10 +598,15 @@ void RewardsDOMHandler::OnGetAddresses(
       func_name == "addresses" || func_name == "addressesForPaymentId")) {
     base::DictionaryValue data;
     data.SetString("BAT", addresses.at("BAT"));
-    data.SetString("BTC", addresses.at("BTC"));
-    data.SetString("ETH", addresses.at("ETH"));
-    data.SetString("LTC", addresses.at("LTC"));
-
+    if (addresses.count("BTC") == 1) {
+      data.SetString("BTC", addresses.at("BTC"));
+    }
+    if (addresses.count("ETH") == 1) {
+      data.SetString("ETH", addresses.at("ETH"));
+    }
+    if (addresses.count("LTC") == 1) {
+      data.SetString("LTC", addresses.at("LTC"));
+    }
     web_ui()->CallJavascriptFunctionUnsafe("brave_rewards." + func_name, data);
   }
 }

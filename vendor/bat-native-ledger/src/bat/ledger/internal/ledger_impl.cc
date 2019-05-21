@@ -613,12 +613,20 @@ bool LedgerImpl::GetAutoContribute() const {
   return bat_state_->GetAutoContribute();
 }
 
-std::map<std::string, std::string> LedgerImpl::GetAddresses() {
+const std::vector<std::string>&
+    LedgerImpl::GetAddressesLimitedCountries() const {
+  return braveledger_ledger::_add_funds_limited_countries;
+}
+
+std::map<std::string, std::string> LedgerImpl::GetAddresses(
+    bool limit_addresses) {
   std::map<std::string, std::string> addresses;
   addresses.emplace("BAT", GetBATAddress());
-  addresses.emplace("BTC", GetBTCAddress());
-  addresses.emplace("ETH", GetETHAddress());
-  addresses.emplace("LTC", GetLTCAddress());
+  if (!limit_addresses) {
+    addresses.emplace("BTC", GetBTCAddress());
+    addresses.emplace("ETH", GetETHAddress());
+    addresses.emplace("LTC", GetLTCAddress());
+  }
   return addresses;
 }
 
