@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef BRAVE_COMPONENTS_BRAVE_SITE_SPECIFIC_BROWSER_SITE_SPECIFIC_SCRIPT_SERVICE_FACTORY_H_
-#define BRAVE_COMPONENTS_BRAVE_SITE_SPECIFIC_BROWSER_SITE_SPECIFIC_SCRIPT_SERVICE_FACTORY_H_
+#ifndef BRAVE_COMPONENTS_GREASELION_BROWSER_GREASELION_SERVICE_FACTORY_H_
+#define BRAVE_COMPONENTS_GREASELION_BROWSER_GREASELION_SERVICE_FACTORY_H_
 
 #include "base/macros.h"
 #include "base/memory/singleton.h"
@@ -12,23 +12,22 @@
 
 class Profile;
 
-namespace brave_site_specific {
+namespace greaselion {
 
-class SiteSpecificScriptService;
+class GreaselionService;
 
-class SiteSpecificScriptServiceFactory
+class GreaselionServiceFactory
   : public BrowserContextKeyedServiceFactory {
  public:
-  static SiteSpecificScriptService* GetForProfile(Profile* profile);
-  static SiteSpecificScriptService* GetForBrowserContext(
+  static GreaselionService* GetForBrowserContext(
       content::BrowserContext* context);
-  static SiteSpecificScriptServiceFactory* GetInstance();
+  static GreaselionServiceFactory* GetInstance();
 
  private:
-  friend struct base::DefaultSingletonTraits<SiteSpecificScriptServiceFactory>;
+  friend struct base::DefaultSingletonTraits<GreaselionServiceFactory>;
 
-  SiteSpecificScriptServiceFactory();
-  ~SiteSpecificScriptServiceFactory() override;
+  GreaselionServiceFactory();
+  ~GreaselionServiceFactory() override;
 
   // BrowserContextKeyedServiceFactory:
   KeyedService* BuildServiceInstanceFor(
@@ -37,9 +36,9 @@ class SiteSpecificScriptServiceFactory
       content::BrowserContext* context) const override;
   bool ServiceIsNULLWhileTesting() const override;
 
-  DISALLOW_COPY_AND_ASSIGN(SiteSpecificScriptServiceFactory);
+  DISALLOW_COPY_AND_ASSIGN(GreaselionServiceFactory);
 };
 
-} // namespace brave_site_specific
+} // namespace greaselion
 
-#endif // BRAVE_COMPONENTS_BRAVE_SITE_SPECIFIC_BROWSER_SITE_SPECIFIC_SERVICE_FACTORY_H_
+#endif // BRAVE_COMPONENTS_GREASELION_BROWSER_SITE_SPECIFIC_SERVICE_FACTORY_H_

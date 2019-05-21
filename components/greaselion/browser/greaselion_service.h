@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef BRAVE_COMPONENTS_BRAVE_SITE_SPECIFIC_BROWSER_SITE_SPECIFIC_SCRIPT_SERVICE_H_
-#define BRAVE_COMPONENTS_BRAVE_SITE_SPECIFIC_BROWSER_SITE_SPECIFIC_SCRIPT_SERVICE_H_
+#ifndef BRAVE_COMPONENTS_GREASELION_BROWSER_GREASELION_SERVICE_H_
+#define BRAVE_COMPONENTS_GREASELION_BROWSER_GREASELION_SERVICE_H_
 
 #include <string>
 
@@ -14,18 +14,18 @@
 #include "components/sessions/core/session_id.h"
 #include "url/gurl.h"
 
-namespace brave_site_specific {
+namespace greaselion {
 
-class SiteSpecificScriptService : public KeyedService {
+class GreaselionService : public KeyedService {
  public:
-  SiteSpecificScriptService() = default;
+  GreaselionService() = default;
 
   virtual bool ScriptsFor(const GURL& primary_url, std::vector<std::string>* scripts) = 0;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(SiteSpecificScriptService);
+  DISALLOW_COPY_AND_ASSIGN(GreaselionService);
 };
 
-}  // namespace brave_site_specific
+}  // namespace greaselion
 
-#endif  // BRAVE_COMPONENTS_BRAVE_SITE_SPECIFIC_BROWSER_SITE_SPECIFIC_SCRIPT_SERVICE_H_
+#endif  // BRAVE_COMPONENTS_GREASELION_BROWSER_GREASELION_SERVICE_H_

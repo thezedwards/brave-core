@@ -36,6 +36,14 @@ LocalDataFilesService::~LocalDataFilesService() { }
 bool LocalDataFilesService::Start() {
   if (initialized_)
     return true;
+  // Ensure that all services that observe the local data files service
+  // are created before calling Start().
+  g_brave_browser_process->autoplay_whitelist_service();
+  g_brave_browser_process->extension_whitelist_service();
+  g_brave_browser_process->referrer_whitelist_service();
+  g_brave_browser_process->greaselion_download_service();
+  g_brave_browser_process->tracking_protection_service();
+
   Register(kLocalDataFilesComponentName,
            g_local_data_files_component_id_,
            g_local_data_files_component_base64_public_key_);

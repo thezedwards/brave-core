@@ -3,8 +3,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef BRAVE_COMPONENTS_BRAVE_SHIELDS_BROWSER_SITE_SPECIFIC_SCRIPT_CONFIG_SERVICE_H_
-#define BRAVE_COMPONENTS_BRAVE_SHIELDS_BROWSER_SITE_SPECIFIC_SCRIPT_CONFIG_SERVICE_H_
+#ifndef BRAVE_COMPONENTS_GREASELION_BROWSER_GREASELION_DOWNLOAD_SERVICE_H_
+#define BRAVE_COMPONENTS_GREASELION_BROWSER_GREASELION_DOWNLOAD_SERVICE_H_
 
 #include <stdint.h>
 
@@ -24,21 +24,21 @@
 #include "extensions/common/url_pattern_set.h"
 #include "url/gurl.h"
 
-#define SITE_SPECIFIC_SCRIPT_CONFIG_FILE "SiteSpecificScripts.json"
-#define SITE_SPECIFIC_SCRIPT_CONFIG_FILE_VERSION "1"
+class GreaselionServiceTest;
 
-class SiteSpecificScriptServiceTest;
+namespace greaselion {
 
-namespace brave_shields {
+extern const char kGreaselionConfigFile[];
+extern const char kGreaselionConfigFileVersion[];
 
-class SiteSpecificScriptRule {
+class GreaselionRule {
  public:
-  SiteSpecificScriptRule(base::ListValue* urls_value,
+  GreaselionRule(base::ListValue* urls_value,
                          base::ListValue* scripts_value,
                          const base::FilePath& root_dir);
-  ~SiteSpecificScriptRule();
+  ~GreaselionRule();
 
-  bool MatchesURL(const GURL& url) const;
+  bool Matches(const GURL& url, bool rewards_enabled) const;
   void Populate(std::vector<std::string>* scripts) const;
 
  private:
@@ -48,17 +48,20 @@ class SiteSpecificScriptRule {
 
   extensions::URLPatternSet urls_;
   std::vector<std::string> scripts_;
-  base::WeakPtrFactory<SiteSpecificScriptRule> weak_factory_;
-  DISALLOW_COPY_AND_ASSIGN(SiteSpecificScriptRule);
+  base::WeakPtrFactory<GreaselionRule> weak_factory_;
+  DISALLOW_COPY_AND_ASSIGN(GreaselionRule);
 };
 
-// The brave shields service in charge of loading and parsing the
-// site-specific script configuration file and the scripts listed in
-// the configuration file.
-class SiteSpecificScriptConfigService : public BaseLocalDataFilesObserver {
+// The Greaselion download service is in charge
+// of loading and parsing the Greaselion configuration file
+// and the scripts that the configuration file references
+class GreaselionDownloadService
+  : public brave_shields::BaseLocalDataFilesObserver {
  public:
-  SiteSpecificScriptConfigService();
-  ~SiteSpecificScriptConfigService() override;
+  GreaselionDownloadService();
+  ~GreaselionDownloadService() override;
+
+  std::vector<std::unique_ptr<GreaselionRule>>* rules() { return &rules_; }
 
   scoped_refptr<base::SequencedTaskRunner> GetTaskRunner();
 
@@ -68,24 +71,24 @@ class SiteSpecificScriptConfigService : public BaseLocalDataFilesObserver {
                         const std::string& manifest) override;
 
  private:
-  friend class ::SiteSpecificScriptServiceTest;
+  friend class ::GreaselionServiceTest;
 
   void OnDATFileDataReady();
   void LoadOnTaskRunner();
 
   std::string file_contents_;
-  std::vector<std::unique_ptr<SiteSpecificScriptRule>> rules_;
+  std::vector<std::unique_ptr<GreaselionRule>> rules_;
   base::FilePath install_dir_;
 
   SEQUENCE_CHECKER(sequence_checker_);
-  base::WeakPtrFactory<SiteSpecificScriptConfigService> weak_factory_;
-  DISALLOW_COPY_AND_ASSIGN(SiteSpecificScriptConfigService);
+  base::WeakPtrFactory<GreaselionDownloadService> weak_factory_;
+  DISALLOW_COPY_AND_ASSIGN(GreaselionDownloadService);
 };
 
-// Creates the SiteSpecificScriptConfigService
-std::unique_ptr<SiteSpecificScriptConfigService>
-SiteSpecificScriptConfigServiceFactory();
+// Creates the GreaselionDownloadService
+std::unique_ptr<GreaselionDownloadService>
+GreaselionDownloadServiceFactory();
 
-}  // namespace brave_shields
+}  // namespace greaselion
 
-#endif  // BRAVE_COMPONENTS_BRAVE_SHIELDS_BROWSER_SITE_SPECIFIC_SCRIPT_CONFIG_SERVICE_H_
+#endif  // BRAVE_COMPONENTS_GREASELION_BROWSER_GREASELION_DOWNLOAD_SERVICE_H_

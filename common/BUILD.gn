@@ -24,6 +24,7 @@ source_set("common") {
   sources = [
     "brave_content_client.cc",
     "brave_content_client.h",
+    "brave_isolated_worlds.h",
     "brave_switches.cc",
     "brave_switches.h",
     "importer/brave_referral.cc",

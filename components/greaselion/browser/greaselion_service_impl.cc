@@ -3,31 +3,30 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "brave/components/brave_site_specific/browser/site_specific_script_service_impl.h"
+#include "brave/components/greaselion/browser/greaselion_service_impl.h"
 
 #include "brave/browser/brave_browser_process_impl.h"
 #include "brave/components/brave_rewards/common/pref_names.h"
-#include "brave/components/brave_site_specific/browser/site_specific_script_config_service.h"
+#include "brave/components/greaselion/browser/greaselion_download_service.h"
 #include "components/prefs/pref_service.h"
 #include "chrome/browser/profiles/profile.h"
 
-namespace brave_site_specific {
+namespace greaselion {
 
-SiteSpecificScriptServiceImpl::SiteSpecificScriptServiceImpl(Profile* profile) :
+GreaselionServiceImpl::GreaselionServiceImpl(Profile* profile) :
     profile_(profile) {
-  DCHECK(!profile_->IsOffTheRecord());
 }
 
-SiteSpecificScriptServiceImpl::~SiteSpecificScriptServiceImpl() = default;
+GreaselionServiceImpl::~GreaselionServiceImpl() = default;
 
-bool SiteSpecificScriptServiceImpl::ScriptsFor(
+bool GreaselionServiceImpl::ScriptsFor(
     const GURL& primary_url,
     std::vector<std::string>* scripts) {
   auto rewards_enabled = profile_->GetPrefs()->GetBoolean(
     brave_rewards::prefs::kBraveRewardsEnabled);
   bool any = false;
-  std::vector<std::unique_ptr<SiteSpecificScriptRule>>* rules =
-    g_brave_browser_process->site_specific_script_config_service()->rules();
+  std::vector<std::unique_ptr<GreaselionRule>>* rules =
+    g_brave_browser_process->greaselion_download_service()->rules();
   scripts->clear();
   for (const auto& rule : *rules) {
     if (rule->Matches(primary_url, rewards_enabled)) {
@@ -38,4 +37,4 @@ bool SiteSpecificScriptServiceImpl::ScriptsFor(
   return any;
 }
 
-}  // namespace brave_site_specific
+}  // namespace greaselion

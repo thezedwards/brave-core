@@ -2,13 +2,15 @@ import("//brave/build/config.gni")
 
 source_set("browser") {
   sources = [
-    "site_specific_script_config_service.cc",
-    "site_specific_script_config_service.h",
-    "site_specific_script_service.h",
-    "site_specific_script_service_factory.cc",
-    "site_specific_script_service_factory.h",
-    "site_specific_script_service_impl.cc",
-    "site_specific_script_service_impl.h",
+    "greaselion_download_service.cc",
+    "greaselion_download_service.h",
+    "greaselion_service.h",
+    "greaselion_service_factory.cc",
+    "greaselion_service_factory.h",
+    "greaselion_service_impl.cc",
+    "greaselion_service_impl.h",
+    "greaselion_tab_helper.cc",
+    "greaselion_tab_helper.h",
   ]
 
   deps = [

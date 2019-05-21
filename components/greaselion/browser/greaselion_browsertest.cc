@@ -10,17 +10,17 @@
 #include "brave/browser/brave_browser_process_impl.h"
 #include "brave/common/brave_paths.h"
 #include "brave/components/brave_shields/browser/local_data_files_service.h"
-#include "brave/components/brave_site_specific/browser/site_specific_script_config_service.h"
-#include "brave/components/brave_site_specific/browser/site_specific_script_service_factory.h"
-#include "brave/components/brave_site_specific/browser/site_specific_script_service_impl.h"
+#include "brave/components/greaselion/browser/greaselion_download_service.h"
+#include "brave/components/greaselion/browser/greaselion_service_factory.h"
+#include "brave/components/greaselion/browser/greaselion_service_impl.h"
 #include "chrome/browser/extensions/extension_browsertest.h"
 #include "chrome/test/base/ui_test_utils.h"
 #include "content/public/test/browser_test_utils.h"
 #include "net/dns/mock_host_resolver.h"
 
 using extensions::ExtensionBrowserTest;
-using brave_site_specific::SiteSpecificScriptService;
-using brave_site_specific::SiteSpecificScriptServiceFactory;
+using greaselion::GreaselionService;
+using greaselion::GreaselionServiceFactory;
 
 const char kLocalDataFilesComponentTestId[] =
     "eclbkhjphkhalklhipiicaldjbnhdfkc";
@@ -34,9 +34,9 @@ const char kLocalDataFilesComponentTestBase64PublicKey[] =
     "WhIYw/5zv1NyIsfUiG8wIs5+OwS419z7dlMKsg1FuB2aQcDyjoXx1habFfHQfQwL"
     "qwIDAQAB";
 
-class SiteSpecificScriptServiceTest : public ExtensionBrowserTest {
+class GreaselionServiceTest : public ExtensionBrowserTest {
  public:
-  SiteSpecificScriptServiceTest() {}
+  GreaselionServiceTest() {}
 
   void SetUp() override {
     InitEmbeddedTestServer();
@@ -51,7 +51,7 @@ class SiteSpecificScriptServiceTest : public ExtensionBrowserTest {
 
   void PreRunTestOnMainThread() override {
     ExtensionBrowserTest::PreRunTestOnMainThread();
-    WaitForSiteSpecificScriptServiceThread();
+    WaitForGreaselionServiceThread();
     ASSERT_TRUE(g_brave_browser_process->local_data_files_service()->
                 IsInitialized());
   }
@@ -76,50 +76,50 @@ class SiteSpecificScriptServiceTest : public ExtensionBrowserTest {
     base::PathService::Get(brave::DIR_TEST_DATA, test_data_dir);
   }
 
-  bool InstallSiteSpecificScriptExtension() {
+  bool InstallGreaselionExtension() {
     base::FilePath test_data_dir;
     GetTestDataDir(&test_data_dir);
     const extensions::Extension* mock_extension =
-        InstallExtension(test_data_dir.AppendASCII("site-specific-script-data"),
+        InstallExtension(test_data_dir.AppendASCII("greaselion-data"),
                          1);
     if (!mock_extension)
       return false;
 
-    g_brave_browser_process->site_specific_script_config_service()->
+    g_brave_browser_process->greaselion_download_service()->
       OnComponentReady(mock_extension->id(), mock_extension->path(), "");
-    WaitForSiteSpecificScriptServiceThread();
+    WaitForGreaselionServiceThread();
 
     return true;
   }
 
-  void WaitForSiteSpecificScriptServiceThread() {
+  void WaitForGreaselionServiceThread() {
     scoped_refptr<base::ThreadTestHelper> io_helper(
         new base::ThreadTestHelper(
-            g_brave_browser_process->site_specific_script_config_service()->
+            g_brave_browser_process->greaselion_download_service()->
             GetTaskRunner()));
     ASSERT_TRUE(io_helper->Run());
     base::RunLoop().RunUntilIdle();
   }
 
   bool ScriptsFor(const GURL& url, std::vector<std::string>* scripts) {
-    SiteSpecificScriptService* site_specific_script_service =
-      SiteSpecificScriptServiceFactory::GetForProfile(profile());
-    return site_specific_script_service->ScriptsFor(url, scripts);
+    GreaselionService* greaselion_service =
+      GreaselionServiceFactory::GetForBrowserContext(profile());
+    return greaselion_service->ScriptsFor(url, scripts);
   }
 
   int GetRulesSize() {
-    return g_brave_browser_process->site_specific_script_config_service()->
+    return g_brave_browser_process->greaselion_download_service()->
       rules()->size();
   }
 
   void ClearRules() {
-    g_brave_browser_process->site_specific_script_config_service()->
+    g_brave_browser_process->greaselion_download_service()->
       rules()->clear();
   }
 };
 
-IN_PROC_BROWSER_TEST_F(SiteSpecificScriptServiceTest, RuleParsing) {
-  ASSERT_TRUE(InstallSiteSpecificScriptExtension());
+IN_PROC_BROWSER_TEST_F(GreaselionServiceTest, RuleParsing) {
+  ASSERT_TRUE(InstallGreaselionExtension());
   std::vector<std::string> scripts;
 
   // URL should match two rules, each with a different script
@@ -176,22 +176,22 @@ IN_PROC_BROWSER_TEST_F(SiteSpecificScriptServiceTest, RuleParsing) {
 // Ensure the site specific script service properly clears its cache of
 // precompiled URLPatterns if initialized twice. (This can happen if
 // the parent component is updated while Brave is running.)
-IN_PROC_BROWSER_TEST_F(SiteSpecificScriptServiceTest, ClearCache) {
-  ASSERT_TRUE(InstallSiteSpecificScriptExtension());
+IN_PROC_BROWSER_TEST_F(GreaselionServiceTest, ClearCache) {
+  ASSERT_TRUE(InstallGreaselionExtension());
   int size = GetRulesSize();
   // clear the cache manually to make sure we're actually
   // reinitializing it the second time
   ClearRules();
-  ASSERT_TRUE(InstallSiteSpecificScriptExtension());
+  ASSERT_TRUE(InstallGreaselionExtension());
   EXPECT_EQ(size, GetRulesSize());
   // now reinitialize without manually clearing (simulates an in-place
   // component update)
-  ASSERT_TRUE(InstallSiteSpecificScriptExtension());
+  ASSERT_TRUE(InstallGreaselionExtension());
   EXPECT_EQ(size, GetRulesSize());
 }
 
-IN_PROC_BROWSER_TEST_F(SiteSpecificScriptServiceTest, ScriptInjection) {
-  ASSERT_TRUE(InstallSiteSpecificScriptExtension());
+IN_PROC_BROWSER_TEST_F(GreaselionServiceTest, ScriptInjection) {
+  ASSERT_TRUE(InstallGreaselionExtension());
   GURL url = embedded_test_server()->GetURL("www.a.com", "/simple.html");
   ui_test_utils::NavigateToURL(browser(), url);
   content::WebContents* contents =

@@ -25,7 +25,7 @@
 #include "brave/components/brave_shields/browser/local_data_files_service.h"
 #include "brave/components/brave_shields/browser/referrer_whitelist_service.h"
 #include "brave/components/brave_shields/browser/tracking_protection_service.h"
-#include "brave/components/brave_site_specific/browser/site_specific_script_config_service.h"
+#include "brave/components/greaselion/browser/greaselion_download_service.h"
 #include "chrome/browser/io_thread.h"
 #include "chrome/common/chrome_paths.h"
 #include "components/component_updater/component_updater_service.h"
@@ -156,13 +156,13 @@ BraveBrowserProcessImpl::referrer_whitelist_service() {
   return referrer_whitelist_service_.get();
 }
 
-brave_site_specific::SiteSpecificScriptConfigService*
-BraveBrowserProcessImpl::site_specific_script_config_service() {
-  if (!site_specific_script_config_service_) {
-    site_specific_script_config_service_ =
-      brave_site_specific::SiteSpecificScriptConfigServiceFactory();
+greaselion::GreaselionDownloadService*
+BraveBrowserProcessImpl::greaselion_download_service() {
+  if (!greaselion_download_service_) {
+    greaselion_download_service_ =
+      greaselion::GreaselionDownloadServiceFactory();
   }
-  return site_specific_script_config_service_.get();
+  return greaselion_download_service_.get();
 }
 
 brave_shields::TrackingProtectionService*
