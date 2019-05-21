@@ -202,3 +202,5 @@ export const onContributionSaved = (properties: Rewards.ContributionSaved) =>
 export const restorePublisher = (publisherKey: string) => action(types.ON_RESTORE_PUBLISHER, {
   publisherKey
 })
+
+export const getExcludedSites = () => action(types.GET_EXCLUDED_SITES)

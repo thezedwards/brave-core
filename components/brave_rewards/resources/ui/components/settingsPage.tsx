@@ -40,6 +40,7 @@ class SettingsPage extends React.Component<Props, {}> {
     this.actions.getReconcileStamp()
     this.actions.getTransactionHistoryForThisCycle()
     this.actions.getAdsData()
+    this.actions.getExcludedSites()
   }
 
   componentDidMount () {

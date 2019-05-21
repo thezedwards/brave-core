@@ -76,6 +76,9 @@ const publishersReducer: Reducer<Rewards.State | undefined> = (state: Rewards.St
     case types.ON_RECURRING_TIP_REMOVED:
       chrome.send('brave_rewards.getRecurringTips')
       break
+    case types.GET_EXCLUDED_SITES:
+      chrome.send('brave_rewards.getExcludedSites')
+      break
   }
 
   return state
