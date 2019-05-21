@@ -59,6 +59,7 @@ source_set("brave_shields") {
     "//brave/vendor/autoplay-whitelist/brave:autoplay-whitelist",
     "//chrome/common",
     "//components/prefs",
+    "//content/public/browser",
     "//third_party/leveldatabase",
   ]
 

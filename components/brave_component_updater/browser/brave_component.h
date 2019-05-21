@@ -13,6 +13,10 @@
 #include "base/macros.h"
 #include "base/memory/weak_ptr.h"
 
+namespace base {
+class SequencedTaskRunner;
+}
+
 namespace brave_component_updater {
 
 class BraveComponent : public base::SupportsWeakPtr<BraveComponent> {
@@ -28,6 +32,7 @@ class BraveComponent : public base::SupportsWeakPtr<BraveComponent> {
                           ReadyCallback ready_callback) = 0;
     virtual bool Unregister(const std::string& component_id) = 0;
     virtual void OnDemandUpdate(const std::string& component_id) = 0;
+    virtual scoped_refptr<base::SequencedTaskRunner> GetTaskRunner() = 0;
   };
 
   BraveComponent(Delegate* delegate);
@@ -36,6 +41,7 @@ class BraveComponent : public base::SupportsWeakPtr<BraveComponent> {
                 const std::string& component_id,
                 const std::string& component_base64_public_key);
   bool Unregister();
+  scoped_refptr<base::SequencedTaskRunner> GetTaskRunner();
 
  protected:
   virtual void OnComponentReady(const std::string& component_id,

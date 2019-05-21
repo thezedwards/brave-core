@@ -6,7 +6,7 @@
 #include "brave/components/brave_component_updater/browser/brave_component.h"
 
 #include "base/bind.h"
-#include "base/bind_helpers.h"
+#include "base/sequenced_task_runner.h"
 
 namespace brave_component_updater {
 
@@ -37,17 +37,21 @@ bool BraveComponent::Unregister() {
   return delegate_->Unregister(component_id_);
 }
 
-// static
-void BraveComponent::OnComponentRegistered(
-    Delegate* delegate,
-    const std::string& component_id) {
-  delegate->OnDemandUpdate(component_id);
+scoped_refptr<base::SequencedTaskRunner> BraveComponent::GetTaskRunner() {
+  return delegate_->GetTaskRunner();
 }
 
 void BraveComponent::OnComponentReady(
     const std::string& component_id,
     const base::FilePath& install_dir,
     const std::string& manifest) {
+}
+
+// static
+void BraveComponent::OnComponentRegistered(
+    Delegate* delegate,
+    const std::string& component_id) {
+  delegate->OnDemandUpdate(component_id);
 }
 
 }  // namespace brave_component_updater
