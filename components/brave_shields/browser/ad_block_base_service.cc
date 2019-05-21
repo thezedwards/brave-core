@@ -197,11 +197,14 @@ void AdBlockBaseService::GetDATFileDataOnTaskRunner(
     return;
   }
 
-  if (!ad_block_client_->deserialize(
+  auto new_ad_block_client = std::make_unique<AdBlockClient>();
+  if (!new_ad_block_client->deserialize(
       reinterpret_cast<char*>(&buffer.front()))) {
     LOG(ERROR) << "Failed to deserialize ad block data";
     return;
   }
+
+  ad_block_client_ = std::move(new_ad_block_client);
 }
 
 bool AdBlockBaseService::Init() {

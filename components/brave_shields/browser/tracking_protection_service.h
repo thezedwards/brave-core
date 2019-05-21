@@ -23,7 +23,6 @@
 #include "base/synchronization/lock.h"
 #include "brave/components/brave_shields/browser/base_local_data_files_observer.h"
 #include "brave/components/brave_shields/browser/buildflags/buildflags.h"  // For STP
-#include "brave/components/brave_component_updater/browser/dat_file_util.h"
 #include "content/public/common/resource_type.h"
 #include "url/gurl.h"
 
@@ -91,7 +90,7 @@ class TrackingProtectionService : public BaseLocalDataFilesObserver {
 #if BUILDFLAG(BRAVE_STP_ENABLED)
   // ParseStorageTrackersData parses the storage trackers list provided by
   // the offline-crawler
-  void ParseStorageTrackersData();
+  void ParseStorageTrackersData(const base::FilePath& dat_file_path);
 
   // For Smart Tracking Protection, we need to keep track of the starting site
   // that initiated the redirects. We use RenderFrameIdKey to determine the
@@ -109,16 +108,13 @@ class TrackingProtectionService : public BaseLocalDataFilesObserver {
 #endif
 
  private:
-  void OnDATFileDataReady();
+  void GetDATFileDataOnTaskRunner(const base::FilePath& dat_file_path);
   std::vector<std::string> GetThirdPartyHosts(const std::string& base_host);
 
 #if BUILDFLAG(BRAVE_STP_ENABLED)
   base::flat_set<std::string> first_party_storage_trackers_;
   std::map<RenderFrameIdKey, GURL> render_frame_key_to_starting_site_url;
-
-  brave_component_updater::DATFileDataBuffer storage_trackers_buffer_;
 #endif
-  brave_component_updater::DATFileDataBuffer buffer_;
 
   std::unique_ptr<CTPParser> tracking_protection_client_;
   std::vector<std::string> third_party_base_hosts_;

@@ -44,18 +44,26 @@ bool ExtensionWhitelistService::IsBlacklisted(const std::string& extension_id) c
   return extension_whitelist_client_->isBlacklisted(extension_id.c_str());
 }
 
-void ExtensionWhitelistService::OnDATFileDataReady() {
-  if (buffer_.empty()) {
+void ExtensionWhitelistService::GetDATFileDataOnTaskRunner(
+    const base::FilePath& dat_file_path) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+
+  brave_component_updater::DATFileDataBuffer buffer;
+  brave_component_updater::GetDATFileData(dat_file_path, &buffer);
+  if (buffer.empty()) {
     LOG(ERROR) << "Could not obtain extension whitelist data";
     return;
   }
-  extension_whitelist_client_.reset(new ExtensionWhitelistParser());
-  if (!extension_whitelist_client_->deserialize(
-        reinterpret_cast<char*>(&buffer_.front()))) {
-    extension_whitelist_client_.reset();
+
+  auto new_extension_whitelist_client =
+      std::make_unique<ExtensionWhitelistParser>();
+  if (!new_extension_whitelist_client->deserialize(
+        reinterpret_cast<char*>(&buffer.front()))) {
     LOG(ERROR) << "Failed to deserialize extension whitelist data";
     return;
   }
+
+  extension_whitelist_client_ = std::move(new_extension_whitelist_client);
 }
 
 void ExtensionWhitelistService::OnComponentReady(
@@ -66,13 +74,11 @@ void ExtensionWhitelistService::OnComponentReady(
   base::FilePath dat_file_path = install_dir.AppendASCII(
     EXTENSION_DAT_FILE_VERSION).AppendASCII(EXTENSION_DAT_FILE);
 
-  GetTaskRunner()->PostTaskAndReply(
+  GetTaskRunner()->PostTask(
       FROM_HERE,
-      base::Bind(&brave_component_updater::GetDATFileData,
-                 dat_file_path,
-                 &buffer_),
-      base::Bind(&ExtensionWhitelistService::OnDATFileDataReady,
-                 weak_factory_.GetWeakPtr()));
+      base::BindOnce(&ExtensionWhitelistService::GetDATFileDataOnTaskRunner,
+                     weak_factory_.GetWeakPtr(),
+                     dat_file_path));
 }
 
 scoped_refptr<base::SequencedTaskRunner>

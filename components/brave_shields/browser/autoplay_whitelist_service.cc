@@ -16,9 +16,9 @@
 #include "base/strings/utf_string_conversions.h"
 #include "base/threading/thread_restrictions.h"
 #include "brave/browser/brave_browser_process_impl.h"
+#include "brave/components/brave_component_updater/browser/dat_file_util.h"
 #include "brave/components/brave_shields/browser/ad_block_service.h"
 #include "brave/components/brave_shields/browser/local_data_files_service.h"
-#include "brave/components/brave_component_updater/browser/dat_file_util.h"
 #include "brave/vendor/autoplay-whitelist/autoplay_whitelist_parser.h"
 #include "net/base/registry_controlled_domains/registry_controlled_domain.h"
 
@@ -43,18 +43,26 @@ bool AutoplayWhitelistService::ShouldAllowAutoplay(const GURL& url) {
   return autoplay_whitelist_client_->matchesHost(etld_plus_one.c_str());
 }
 
-void AutoplayWhitelistService::OnDATFileDataReady() {
-  if (buffer_.empty()) {
+void AutoplayWhitelistService::GetDATFileDataOnTaskRunner(
+    const base::FilePath& dat_file_path) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+
+  brave_component_updater::DATFileDataBuffer buffer;
+  brave_component_updater::GetDATFileData(dat_file_path, &buffer);
+  if (buffer.empty()) {
     LOG(ERROR) << "Could not obtain autoplay whitelist data";
     return;
   }
-  autoplay_whitelist_client_.reset(new AutoplayWhitelistParser());
-  if (!autoplay_whitelist_client_->deserialize(
-        reinterpret_cast<char*>(&buffer_.front()))) {
-    autoplay_whitelist_client_.reset();
+
+  auto new_autoplay_whitelist_client =
+      std::make_unique<AutoplayWhitelistParser>();
+  if (!new_autoplay_whitelist_client->deserialize(
+        reinterpret_cast<char*>(&buffer.front()))) {
     LOG(ERROR) << "Failed to deserialize autoplay whitelist data";
     return;
   }
+
+  autoplay_whitelist_client_ = std::move(new_autoplay_whitelist_client);
 }
 
 void AutoplayWhitelistService::OnComponentReady(
@@ -65,13 +73,11 @@ void AutoplayWhitelistService::OnComponentReady(
   base::FilePath dat_file_path = install_dir.AppendASCII(
     AUTOPLAY_DAT_FILE_VERSION).AppendASCII(AUTOPLAY_DAT_FILE);
 
-  GetTaskRunner()->PostTaskAndReply(
+  GetTaskRunner()->PostTask(
       FROM_HERE,
-      base::Bind(&brave_component_updater::GetDATFileData,
-                 dat_file_path,
-                 &buffer_),
-      base::Bind(&AutoplayWhitelistService::OnDATFileDataReady,
-                 weak_factory_.GetWeakPtr()));
+      base::BindOnce(&AutoplayWhitelistService::GetDATFileDataOnTaskRunner,
+                     weak_factory_.GetWeakPtr(),
+                     dat_file_path));
 }
 
 scoped_refptr<base::SequencedTaskRunner>

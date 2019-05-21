@@ -175,14 +175,19 @@ bool TrackingProtectionService::ShouldStoreState(HostContentSettingsMap* map,
          first_party_storage_trackers_.end();
 }
 
-void TrackingProtectionService::ParseStorageTrackersData() {
-  if (storage_trackers_buffer_.empty()) {
+void TrackingProtectionService::ParseStorageTrackersData(
+    const base::FilePath& dat_file_path) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+
+  brave_component_updater::DATFileDataBuffer buffer;
+  brave_component_updater::GetDATFileData(dat_file_path, &buffer);
+  if (buffer.empty()) {
     LOG(ERROR) << "Could not obtain tracking protection data";
     return;
   }
 
-  std::string trackers(storage_trackers_buffer_.begin(),
-                       storage_trackers_buffer_.end());
+  std::string trackers(buffer.begin(),
+                       buffer.end());
   std::vector<std::string> storage_trackers =
       base::SplitString(base::StringPiece(trackers.data(), trackers.size()),
                         ",", base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY);
@@ -251,18 +256,26 @@ bool TrackingProtectionService::ShouldStartRequest(
   return false;
 }
 
-void TrackingProtectionService::OnDATFileDataReady() {
-  if (buffer_.empty()) {
+void TrackingProtectionService::GetDATFileDataOnTaskRunner(
+    const base::FilePath& dat_file_path) {
+  DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+
+  brave_component_updater::DATFileDataBuffer buffer;
+  brave_component_updater::GetDATFileData(dat_file_path, &buffer);
+  if (buffer.empty()) {
     LOG(ERROR) << "Could not obtain tracking protection data";
     return;
   }
-  tracking_protection_client_.reset(new CTPParser());
-  if (!tracking_protection_client_->deserialize(
-          reinterpret_cast<char*>(&buffer_.front()))) {
-    tracking_protection_client_.reset();
+
+  auto new_tracking_protection_client =
+      std::make_unique<CTPParser>();
+  if (!new_tracking_protection_client->deserialize(
+        reinterpret_cast<char*>(&buffer.front()))) {
     LOG(ERROR) << "Failed to deserialize tracking protection data";
     return;
   }
+
+  tracking_protection_client_ = std::move(new_tracking_protection_client);
 }
 
 void TrackingProtectionService::OnComponentReady(
@@ -273,13 +286,11 @@ void TrackingProtectionService::OnComponentReady(
       install_dir.AppendASCII(kDatFileVersion)
           .AppendASCII(kNavigationTrackersFile);
 
-  GetTaskRunner()->PostTaskAndReply(
+  GetTaskRunner()->PostTask(
       FROM_HERE,
-      base::Bind(&brave_component_updater::GetDATFileData,
-                 navigation_tracking_protection_path,
-                 &buffer_),
-      base::Bind(&TrackingProtectionService::OnDATFileDataReady,
-                 weak_factory_.GetWeakPtr()));
+      base::BindOnce(&TrackingProtectionService::GetDATFileDataOnTaskRunner,
+                     weak_factory_.GetWeakPtr(),
+                     navigation_tracking_protection_path));
 
 #if BUILDFLAG(BRAVE_STP_ENABLED)
   if (!TrackingProtectionHelper::IsSmartTrackingProtectionEnabled()) {
@@ -289,13 +300,12 @@ void TrackingProtectionService::OnComponentReady(
       install_dir.AppendASCII(kDatFileVersion)
           .AppendASCII(kStorageTrackersFile);
 
-  GetTaskRunner()->PostTaskAndReply(
+  GetTaskRunner()->PostTask(
       FROM_HERE,
-      base::Bind(&brave_component_updater::GetDATFileData,
-                 storage_tracking_protection_path,
-                 &storage_trackers_buffer_),
-      base::Bind(&TrackingProtectionService::ParseStorageTrackersData,
-                 weak_factory_.GetWeakPtr()));
+      base::BindOnce(&TrackingProtectionService::ParseStorageTrackersData,
+                     weak_factory_.GetWeakPtr(),
+                     storage_tracking_protection_path));
+
 #endif
 }
 
