@@ -26,6 +26,7 @@
 #include "chrome/common/chrome_switches.h"
 #include "components/autofill/core/common/autofill_features.h"
 #include "components/autofill/core/common/autofill_payments_features.h"
+#include "components/omnibox/common/omnibox_features.h"
 #include "components/password_manager/core/common/password_manager_features.h"
 #include "components/unified_consent/feature.h"
 #include "content/public/common/content_features.h"
@@ -139,6 +140,7 @@ bool BraveMainDelegate::BasicStartupComplete(int* exit_code) {
       extensions_features::kNewExtensionUpdaterService.name,
 #endif
       features::kDesktopPWAWindowing.name,
+      omnibox::kSimplifyHttpsIndicator.name,
   };
 
   // Disabled features.
